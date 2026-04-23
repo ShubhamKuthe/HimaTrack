@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HimaTrack</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #11181c;
+      color: #d6dde3;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 122px 1fr;
+      width: 100vw;
+      height: 100vh;
+      min-width: 0;
+      background:
+        linear-gradient(135deg, #11181c 0%, #182329 45%, #141c21 100%);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 34px;
+      background:
+        linear-gradient(180deg, rgba(53, 78, 96, 0.96), rgba(38, 55, 66, 0.96) 52%, rgba(29, 39, 46, 0.96));
+      border-right: 1px solid rgba(119, 160, 186, 0.12);
+      padding: 78px 12px 22px;
+      box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04), 10px 0 24px rgba(0, 0, 0, 0.14);
+    }
+
+    .nav-item {
+      display: grid;
+      gap: 8px;
+      justify-items: center;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #aebdcc;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .nav-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 3px solid #9fb7ca;
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      background: rgba(15, 24, 29, 0.18);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-item.active {
+      color: #49a8ff;
+    }
+
+    .nav-item.active .nav-icon {
+      border-color: #49a8ff;
+      color: #49a8ff;
+      background: rgba(73, 168, 255, 0.1);
+      box-shadow: 0 0 0 1px rgba(73, 168, 255, 0.18), 0 10px 20px rgba(0, 0, 0, 0.16);
+    }
+
+    .nav-item:hover {
+      color: #d7e3ed;
+    }
+
+    .sidebar-help {
+      margin-top: auto;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 54px 1fr;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: #141d22;
+    }
+
+    .main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, rgba(112, 227, 164, 0.08), transparent 30%),
+        linear-gradient(315deg, rgba(97, 168, 255, 0.08), transparent 34%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 86px),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 86px),
+        linear-gradient(180deg, rgba(24, 34, 40, 0.98), rgba(17, 25, 30, 0.98));
+    }
+
+    .main::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 18%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.12));
+      mix-blend-mode: screen;
+      opacity: 0.5;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 58px 180px 88px minmax(220px, 1fr) 170px 130px minmax(150px, 1fr) minmax(130px, 170px) minmax(120px, 150px) 82px;
+      gap: 10px;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      background:
+        linear-gradient(180deg, rgba(75, 88, 98, 0.98), rgba(54, 66, 74, 0.98));
+      border-bottom: 1px solid rgba(179, 205, 221, 0.12);
+      padding: 10px 14px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .toolbar-button,
+    .range-button,
+    .toolbar-box {
+      height: 34px;
+      border: 1px solid rgba(149, 169, 181, 0.2);
+      border-radius: 5px;
+      background: linear-gradient(180deg, #5f6b74, #505b64);
+      color: #dce3e8;
+      font: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 1px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .range-control {
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
+      gap: 0;
+    }
+
+    .range-button:first-child {
+      border-radius: 5px 0 0 5px;
+    }
+
+    .range-button:last-child {
+      border-radius: 0 5px 5px 0;
+    }
+
+    .toolbar-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .toolbar-filter,
+    .toolbar-search {
+      justify-content: flex-start;
+      padding: 0 14px;
+      color: #c3ccd3;
+    }
+
+    .toolbar-search {
+      color: #929ca4;
+    }
+
+    input.toolbar-search {
+      outline: none;
+    }
+
+    input.toolbar-search:focus {
+      border-color: #69a9ff;
+      color: #e7edf2;
+      box-shadow: 0 0 0 2px rgba(105, 169, 255, 0.16);
+    }
+
+    .reset-button {
+      color: #ffd3d3;
+    }
+
+    .user-pill {
+      justify-content: flex-start;
+      min-width: 0;
+      padding: 0 12px;
+      overflow: hidden;
+      color: #77dd9f;
+    }
+
+    .user-pill-text {
+      display: block;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .logout-button {
+      color: #dce3e8;
+      min-width: 82px;
+    }
+
+    .startup-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(97, 168, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 45% 50%, rgba(112, 227, 164, 0.12), transparent 34%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 88px),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 88px),
+        linear-gradient(135deg, #11181c, #172228 55%, #10171b);
+    }
+
+    .startup-splash.active {
+      display: grid;
+    }
+
+    .startup-splash.leaving {
+      animation: splash-fade-out 420ms ease forwards;
+    }
+
+    .splash-content {
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+      transform: translateY(8px);
+      animation: splash-rise 760ms ease-out forwards;
+    }
+
+    .splash-logo-wrap {
+      width: 138px;
+      height: 138px;
+      display: grid;
+      place-items: center;
+      border-radius: 34px;
+      background: rgba(12, 20, 25, 0.58);
+      border: 1px solid rgba(142, 178, 199, 0.18);
+      box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.42),
+        0 0 0 8px rgba(97, 168, 255, 0.035),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      animation: splash-logo-pulse 1550ms ease-in-out infinite;
+    }
+
+    .splash-logo {
+      width: 112px;
+      height: 112px;
+      object-fit: contain;
+      border-radius: 26px;
+      animation: splash-logo-in 620ms cubic-bezier(0.2, 0.9, 0.2, 1.2) forwards;
+    }
+
+    .splash-title {
+      color: #edf5fb;
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 0;
+      line-height: 1;
+      opacity: 0;
+      animation: splash-text-in 520ms ease 420ms forwards;
+    }
+
+    .splash-credit {
+      color: #91a6b3;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      opacity: 0;
+      animation: splash-text-in 520ms ease 640ms forwards;
+    }
+
+    .splash-loader {
+      width: 180px;
+      height: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(99, 119, 132, 0.28);
+      opacity: 0;
+      animation: splash-text-in 420ms ease 760ms forwards;
+    }
+
+    .splash-loader::before {
+      content: "";
+      display: block;
+      width: 42%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #70e3a4, #61a8ff, #ff4f86);
+      animation: splash-loader 1150ms ease-in-out infinite;
+    }
+
+    @keyframes splash-rise {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes splash-logo-in {
+      from {
+        opacity: 0;
+        transform: scale(0.76) rotate(-5deg);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+      }
+    }
+
+    @keyframes splash-logo-pulse {
+      0%,
+      100% {
+        box-shadow:
+          0 28px 80px rgba(0, 0, 0, 0.42),
+          0 0 0 8px rgba(97, 168, 255, 0.035),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      50% {
+        box-shadow:
+          0 32px 90px rgba(0, 0, 0, 0.48),
+          0 0 0 12px rgba(112, 227, 164, 0.05),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    @keyframes splash-text-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes splash-loader {
+      from {
+        transform: translateX(-110%);
+      }
+
+      to {
+        transform: translateX(250%);
+      }
+    }
+
+    @keyframes splash-fade-out {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .auth-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(112, 227, 164, 0.08), transparent 32%),
+        linear-gradient(315deg, rgba(97, 168, 255, 0.08), transparent 34%),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 86px),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 86px),
+        #121b20;
+      padding: 24px;
+    }
+
+    .auth-screen.active {
+      display: grid;
+    }
+
+    .auth-panel {
+      width: min(420px, 100%);
+      background:
+        linear-gradient(180deg, rgba(28, 40, 47, 0.96), rgba(20, 29, 34, 0.96));
+      border: 1px solid rgba(132, 160, 177, 0.22);
+      padding: 24px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    }
+
+    .auth-success {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border: 1px solid #3f8c5e;
+      background: #14291d;
+      color: #7bed9f;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .auth-success.active {
+      display: flex;
+      animation: success-pop 220ms ease-out;
+    }
+
+    .success-check {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 22px;
+      border-radius: 50%;
+      background: #69df8d;
+      color: #102019;
+      animation: check-bounce 520ms ease-out;
+    }
+
+    @keyframes success-pop {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes check-bounce {
+      0% {
+        transform: scale(0.35);
+      }
+
+      60% {
+        transform: scale(1.15);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .auth-title {
+      color: #d6dde3;
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .auth-copy {
+      color: #8f9ba4;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .auth-tab,
+    .auth-submit {
+      height: 38px;
+      border: 1px solid #5b646c;
+      background: #3e4951;
+      color: #dce3e8;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .auth-submit:disabled {
+      cursor: wait;
+      opacity: 0.75;
+    }
+
+    .auth-tab.active,
+    .auth-submit {
+      border-color: #61a8ff;
+      background: #56616a;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .auth-field label {
+      color: #aab5bd;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .auth-field input {
+      height: 38px;
+      border: 1px solid #4c5962;
+      background: #11191d;
+      color: #e7edf2;
+      font: inherit;
+      padding: 0 12px;
+      outline: none;
+    }
+
+    .auth-field input:focus {
+      border-color: #61a8ff;
+    }
+
+    .auth-error {
+      min-height: 18px;
+      color: #ff9d9d;
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .sync-toast {
+      display: flex;
+      min-width: 0;
+      justify-content: center;
+      padding: 0 12px;
+      overflow: hidden;
+      color: #b7c3cc;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .sync-toast.active {
+      animation: sync-toast-in 180ms ease-out;
+    }
+
+    .sync-toast.ok {
+      border-color: rgba(112, 227, 164, 0.36);
+      color: #83edaa;
+    }
+
+    .sync-toast.error {
+      border-color: rgba(255, 157, 157, 0.42);
+      color: #ffaaa8;
+    }
+
+    @keyframes sync-toast-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content {
+      min-height: 0;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: minmax(320px, 43%) minmax(360px, 57%);
+      grid-template-areas:
+        "summary chart"
+        "apps projects";
+      gap: 18px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 26px;
+      background: transparent;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: grid;
+    }
+
+    .workspace-view {
+      min-height: 0;
+      position: relative;
+      z-index: 1;
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 26px;
+      background: transparent;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(260px, auto);
+      gap: 18px;
+    }
+
+    .wide-panel {
+      grid-column: 1 / -1;
+    }
+
+    .top-left {
+      display: grid;
+      grid-area: summary;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 18px;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .tile,
+    .panel {
+      background:
+        linear-gradient(180deg, rgba(27, 39, 46, 0.92), rgba(17, 26, 31, 0.94));
+      border: 1px solid rgba(128, 154, 170, 0.14);
+      border-radius: 6px;
+      box-shadow:
+        0 18px 34px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    }
+
+    .tile {
+      min-width: 0;
+      min-height: 138px;
+      padding: 18px 18px 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tile::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-top: 1px solid rgba(112, 227, 164, 0.1);
+      pointer-events: none;
+    }
+
+    .tile-title,
+    .panel-title {
+      color: #c8d0d6;
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .tile-value {
+      margin-top: 22px;
+      color: #2e7dff;
+      font-size: 36px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tile-value.compact {
+      margin-top: 24px;
+      font-size: 25px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tile-note {
+      margin-top: 10px;
+      color: #8c969e;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .score {
+      color: #66d85a;
+    }
+
+    .mini-chart {
+      width: 100%;
+      height: calc(100% - 34px);
+      min-height: 78px;
+      margin-top: 6px;
+      position: relative;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .top-right,
+    .bottom-panel {
+      min-height: 0;
+      min-width: 0;
+      padding: 18px;
+      overflow: hidden;
+    }
+
+    .top-right {
+      grid-area: chart;
+    }
+
+    .content > .bottom-panel:nth-of-type(3) {
+      grid-area: apps;
+    }
+
+    .content > .bottom-panel:nth-of-type(4) {
+      grid-area: projects;
+    }
+
+    #reports-view {
+      grid-template-columns: minmax(0, 2fr) minmax(300px, 0.85fr);
+      grid-auto-rows: auto;
+      align-content: start;
+    }
+
+    #reports-view .wide-panel {
+      grid-column: 1;
+      grid-row: 1 / 3;
+    }
+
+    #reports-view > .bottom-panel:nth-of-type(2) {
+      grid-column: 2;
+      grid-row: 1;
+      min-height: 0;
+    }
+
+    #reports-view > .bottom-panel:nth-of-type(3) {
+      grid-column: 2;
+      grid-row: 2;
+      min-height: 0;
+    }
+
+    .chart-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      height: 30px;
+      margin-bottom: 10px;
+      color: #cbd3d9;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .select-like {
+      height: 28px;
+      padding: 2px 10px;
+      background: linear-gradient(180deg, #63717b, #515d66);
+      border: 1px solid rgba(171, 193, 207, 0.2);
+      border-radius: 3px;
+      color: #eef3f6;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .main-chart-wrap {
+      height: calc(100% - 42px);
+      min-height: 230px;
+      position: relative;
+    }
+
+    .bottom-panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .bottom-content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(220px, 43%) minmax(0, 57%);
+      gap: 18px;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .donut-wrap {
+      width: 100%;
+      height: min(300px, 100%);
+      min-height: 210px;
+      position: relative;
+    }
+
+    .list {
+      min-height: 0;
+      max-height: 100%;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .usage-row,
+    .project-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-height: 38px;
+      border-bottom: 1px solid rgba(128, 154, 170, 0.12);
+      color: #cdd5dc;
+      font-size: 17px;
+      min-width: 0;
+    }
+
+    .usage-row:hover,
+    .project-row:hover {
+      background: rgba(97, 168, 255, 0.045);
+    }
+
+    .row-main {
+      min-width: 0;
+    }
+
+    .app-label {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .app-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      object-fit: contain;
+      background: #253039;
+      border: 1px solid #38454e;
+      padding: 2px;
+    }
+
+    .row-main span {
+      display: block;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .usage-row span:last-child,
+    .project-row span:last-child {
+      color: #9da7af;
+      font-weight: 800;
+      white-space: nowrap;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .row-meter {
+      width: 100%;
+      height: 4px;
+      margin-top: 5px;
+      background: rgba(65, 83, 95, 0.55);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .row-meter div {
+      height: 100%;
+      background: linear-gradient(90deg, #61a8ff, #70e3a4);
+      border-radius: inherit;
+    }
+
+    .empty {
+      color: #8d979f;
+      padding: 18px 0;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #cdd5dc;
+      font-size: 15px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #2a3339;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .data-table th {
+      color: #8f9ba4;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .data-table td {
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-box {
+      min-width: 0;
+      background: rgba(14, 23, 28, 0.68);
+      border: 1px solid rgba(128, 154, 170, 0.14);
+      padding: 16px;
+      border-radius: 5px;
+    }
+
+    .stat-label {
+      color: #8f9ba4;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .stat-value {
+      margin-top: 10px;
+      color: #61a8ff;
+      font-size: 28px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-content: start;
+    }
+
+    .guide-card {
+      min-width: 0;
+      padding: 18px;
+      background: rgba(14, 23, 28, 0.68);
+      border: 1px solid rgba(128, 154, 170, 0.14);
+      border-radius: 6px;
+    }
+
+    .guide-card h3 {
+      margin: 0 0 10px;
+      color: #e1e9ef;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .guide-card p {
+      margin: 0;
+      color: #9ba9b3;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .guide-card strong {
+      color: #70e3a4;
+    }
+
+    .mac-permission-card {
+      display: none;
+    }
+
+    .mac-permission-card.active {
+      display: block;
+    }
+
+    .permission-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(128, 154, 170, 0.14);
+      color: #cbd5dc;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .permission-status {
+      color: #91a6b3;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .permission-button {
+      min-width: 92px;
+      height: 30px;
+      border: 1px solid rgba(149, 169, 181, 0.2);
+      border-radius: 5px;
+      background: linear-gradient(180deg, #5f6b74, #505b64);
+      color: #dce3e8;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    #current-app {
+      color: #77dd9f;
+    }
+
+    #current-window {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 1200px) {
+      .app-shell {
+        grid-template-columns: 104px 1fr;
+      }
+
+      .sidebar {
+        gap: 28px;
+        padding-top: 78px;
+      }
+
+      .toolbar {
+        grid-template-columns: 58px 145px 76px minmax(170px, 1fr) 150px 120px minmax(150px, 210px) minmax(130px, 170px);
+      }
+
+      .user-pill,
+      .logout-button {
+        display: none;
+      }
+
+      .content {
+        gap: 12px;
+        padding: 12px;
+        grid-template-rows: minmax(300px, auto) minmax(340px, auto);
+      }
+
+      .workspace-view {
+        padding: 12px;
+        gap: 12px;
+      }
+
+      #reports-view {
+        grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+      }
+
+      .tile-title,
+      .panel-title,
+      .usage-row,
+      .project-row {
+        font-size: 14px;
+      }
+
+      .tile-value {
+        font-size: 28px;
+      }
+
+      .tile-value.compact {
+        font-size: 23px;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .main {
+        grid-template-rows: auto 1fr;
+      }
+
+      .toolbar {
+        grid-template-columns: 58px minmax(160px, 1fr) 78px;
+        grid-auto-rows: 34px;
+      }
+
+      .range-control {
+        grid-column: 1 / 3;
+      }
+
+      .toolbar-filter {
+        grid-column: 3 / 4;
+        min-width: 0;
+      }
+
+      #device-filter {
+        grid-column: 1 / 2;
+      }
+
+      .toolbar-search {
+        grid-column: 2 / -1;
+        min-width: 0;
+      }
+
+      .sync-toast {
+        grid-column: 1 / -1;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(300px, auto) minmax(330px, auto) minmax(330px, auto);
+        grid-template-areas:
+          "summary"
+          "chart"
+          "apps"
+          "projects";
+        align-content: start;
+      }
+
+      #reports-view {
+        grid-template-columns: 1fr;
+      }
+
+      #reports-view .wide-panel,
+      #reports-view > .bottom-panel:nth-of-type(2),
+      #reports-view > .bottom-panel:nth-of-type(3) {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .top-left {
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+        grid-template-rows: none;
+        grid-auto-rows: 132px;
+      }
+
+      .top-right {
+        min-height: 310px;
+      }
+
+      .bottom-panel {
+        min-height: 330px;
+      }
+
+      .tile {
+        min-height: 132px;
+        padding: 16px;
+      }
+
+      .tile-value {
+        margin-top: 18px;
+        font-size: 28px;
+      }
+
+      .tile-note {
+        font-size: 14px;
+      }
+
+      .main-chart-wrap {
+        min-height: 245px;
+      }
+
+      .donut-wrap {
+        min-height: 190px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        min-width: 0;
+        grid-template-columns: 76px 1fr;
+      }
+
+      .sidebar {
+        padding: 66px 8px 18px;
+      }
+
+      .nav-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .nav-item {
+        font-size: 11px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .toolbar-button,
+      .range-button,
+      .toolbar-box {
+        min-width: 0;
+      }
+
+      .range-control,
+      .toolbar-filter,
+      #device-filter,
+      .toolbar-search {
+        grid-column: 1 / -1;
+      }
+
+      .top-left {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-content {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .workspace-view {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .guide-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .donut-wrap {
+        height: 220px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <section class="startup-splash active" id="startup-splash">
+    <div class="splash-content">
+      <div class="splash-logo-wrap">
+        <img class="splash-logo" src="assets/app-icon-small.png" alt="HimaTrack logo" />
+      </div>
+      <div class="splash-title">HimaTrack</div>
+      <div class="splash-credit">made by shubham kuthe</div>
+      <div class="splash-loader"></div>
+    </div>
+  </section>
+
+  <section class="auth-screen active" id="auth-screen">
+    <div class="auth-panel">
+      <div class="auth-title">HimaTrack</div>
+      <div class="auth-copy">Sign in to sync your tracking history across devices.</div>
+      <div class="auth-success" id="auth-success">
+        <span class="success-check">✓</span>
+        <span>Account created successfully</span>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="login-tab" type="button">Sign In</button>
+        <button class="auth-tab" id="signup-tab" type="button">Sign Up</button>
+      </div>
+      <form id="auth-form">
+        <div class="auth-field">
+          <label for="auth-username">Email</label>
+          <input id="auth-username" type="email" autocomplete="email" />
+        </div>
+        <div class="auth-field">
+          <label for="auth-password">Password</label>
+          <input id="auth-password" type="password" autocomplete="current-password" />
+        </div>
+        <div class="auth-error" id="auth-error"></div>
+        <button class="auth-submit" id="auth-submit" type="submit">Sign In</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <button class="nav-item active" data-view="overview">
+        <div class="nav-icon">O</div>
+        <div>Overview</div>
+      </button>
+      <button class="nav-item" data-view="review">
+        <div class="nav-icon">R</div>
+        <div>Review</div>
+      </button>
+      <button class="nav-item" data-view="details">
+        <div class="nav-icon">D</div>
+        <div>Details</div>
+      </button>
+      <button class="nav-item" data-view="reports">
+        <div class="nav-icon">P</div>
+        <div>Reports</div>
+      </button>
+      <button class="nav-item sidebar-help" data-view="guide">
+        <div class="nav-icon">?</div>
+      </button>
+    </aside>
+
+    <main class="main">
+      <div class="toolbar">
+        <button class="toolbar-button">Menu</button>
+        <button class="toolbar-button" id="new-task">New Task</button>
+        <button class="toolbar-button reset-button" id="reset-time">Reset</button>
+        <div class="range-control">
+          <button class="range-button" id="prev-range">&lt;</button>
+          <div class="toolbar-box" id="range-label">Past 30 Days</div>
+          <button class="range-button" id="next-range">&gt;</button>
+        </div>
+        <select class="toolbar-box toolbar-filter" id="range-mode">
+          <option value="30">Past 30 Days</option>
+          <option value="7">Past 7 Days</option>
+          <option value="1">Day</option>
+        </select>
+        <select class="toolbar-box toolbar-filter" id="device-filter">
+          <option value="win32">Windows</option>
+          <option value="darwin">Mac</option>
+        </select>
+        <input class="toolbar-box toolbar-search" id="search-input" placeholder="Search apps or windows" />
+        <div class="toolbar-box sync-toast" id="cloud-sync-status">Cloud sync waiting</div>
+        <div class="toolbar-box user-pill" id="current-user">
+          <span class="user-pill-text">Not signed in</span>
+        </div>
+        <button class="toolbar-button logout-button" id="logout">Logout</button>
+      </div>
+
+      <section class="content view active" id="overview-view" data-view-panel="overview">
+        <section class="top-left">
+          <div class="tile">
+            <div class="tile-title">Total time</div>
+            <div class="tile-value" id="total-time">0m</div>
+            <div class="tile-note" id="range-note">Tracked in range</div>
+          </div>
+
+          <div class="tile">
+            <div class="tile-title">Live now</div>
+            <div class="tile-value compact" id="current-app">Waiting</div>
+            <div class="tile-note" id="current-window">Starting tracker</div>
+          </div>
+
+          <div class="tile">
+            <div class="tile-title">Applications</div>
+            <div class="tile-value" id="apps-used">0</div>
+            <div class="tile-note" id="tracking-status">Tracking live</div>
+          </div>
+
+          <div class="tile">
+            <div class="tile-title">Productivity score</div>
+            <div class="tile-value score" id="productivity-score">69%</div>
+            <div class="tile-note" id="productivity-note">Scored from apps</div>
+          </div>
+
+          <div class="tile">
+            <div class="tile-title">Most active weekdays</div>
+            <div class="mini-chart">
+              <canvas id="weekday-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="tile-title">Most active hours</div>
+            <div class="mini-chart">
+              <canvas id="hour-chart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel top-right">
+          <div class="chart-toolbar">
+            <span class="select-like">Time per App</span>
+            <span>per</span>
+            <span class="select-like">Day</span>
+          </div>
+          <div class="main-chart-wrap">
+            <canvas id="weekly-chart"></canvas>
+          </div>
+        </section>
+
+        <section class="panel bottom-panel">
+          <div class="panel-title">Applications</div>
+          <div class="bottom-content">
+            <div class="donut-wrap">
+              <canvas id="usage-chart"></canvas>
+            </div>
+            <div class="list" id="usage-list">No usage data yet</div>
+          </div>
+        </section>
+
+        <section class="panel bottom-panel">
+          <div class="panel-title">Projects & Tasks</div>
+          <div class="bottom-content">
+            <div class="donut-wrap">
+              <canvas id="project-chart"></canvas>
+            </div>
+            <div class="list" id="project-list">No history yet</div>
+          </div>
+        </section>
+      </section>
+
+      <section class="workspace-view view" id="review-view" data-view-panel="review">
+        <section class="panel bottom-panel wide-panel">
+          <div class="panel-title">Review</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Application</th>
+                  <th>Window</th>
+                  <th>Task</th>
+                  <th>Duration</th>
+                </tr>
+              </thead>
+              <tbody id="review-table"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel bottom-panel">
+          <div class="panel-title">Daily Totals</div>
+          <div class="list" id="review-day-list"></div>
+        </section>
+        <section class="panel bottom-panel">
+          <div class="panel-title">Focus Breakdown</div>
+          <div class="list" id="review-focus-list"></div>
+        </section>
+      </section>
+
+      <section class="workspace-view view" id="details-view" data-view-panel="details">
+        <section class="panel bottom-panel wide-panel">
+          <div class="panel-title">Application Details</div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Application</th>
+                  <th>Total</th>
+                  <th>Last Used</th>
+                  <th>Executable Path</th>
+                </tr>
+              </thead>
+              <tbody id="details-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="workspace-view view" id="reports-view" data-view-panel="reports">
+        <section class="panel bottom-panel wide-panel">
+          <div class="panel-title">Reports</div>
+          <div class="stat-grid" id="reports-stats"></div>
+        </section>
+        <section class="panel bottom-panel">
+          <div class="panel-title">Top Applications</div>
+          <div class="list" id="reports-app-list"></div>
+        </section>
+        <section class="panel bottom-panel">
+          <div class="panel-title">Top Projects & Tasks</div>
+          <div class="list" id="reports-project-list"></div>
+        </section>
+      </section>
+
+      <section class="workspace-view view" id="guide-view" data-view-panel="guide">
+        <section class="panel bottom-panel wide-panel">
+          <div class="panel-title">How to Use HimaTrack</div>
+          <div class="guide-grid">
+            <div class="guide-card">
+              <h3>Start Tracking</h3>
+              <p>Sign in once and HimaTrack starts detecting the active application automatically. Keep it open or minimized to the tray while you work.</p>
+            </div>
+            <div class="guide-card">
+              <h3>Background Mode</h3>
+              <p>Minimize or close the window to send HimaTrack to the Windows tray. Tracking keeps running until you choose <strong>Quit HimaTrack</strong> from the tray menu.</p>
+            </div>
+            <div class="guide-card">
+              <h3>Idle Time</h3>
+              <p>If there is no keyboard or mouse activity for 60 seconds, tracking pauses and shows <strong>Idle</strong>. It resumes automatically when you return.</p>
+            </div>
+            <div class="guide-card">
+              <h3>Tasks</h3>
+              <p>Use <strong>New Task</strong> to label future tracked time. Clear the task name when you want tracking to go back to app/window names only.</p>
+            </div>
+            <div class="guide-card">
+              <h3>Views</h3>
+              <p><strong>Overview</strong> shows live totals, <strong>Review</strong> shows history, <strong>Details</strong> shows app paths, and <strong>Reports</strong> summarizes top apps and projects.</p>
+            </div>
+            <div class="guide-card">
+              <h3>Filters</h3>
+              <p>Use the range selector for Past 30 Days, Past 7 Days, or Day. Search filters the visible app/window history in the current range.</p>
+            </div>
+            <div class="guide-card">
+              <h3>Cloud Sync</h3>
+              <p>Your account is handled by Firebase. Choose <strong>Windows</strong> or <strong>Mac</strong> in the toolbar to view tracked time from that platform.</p>
+            </div>
+            <div class="guide-card">
+              <h3>macOS Permissions</h3>
+              <p>On Mac, allow HimaTrack in <strong>Accessibility</strong> and <strong>Screen Recording</strong> so it can detect the active application and window title.</p>
+            </div>
+            <div class="guide-card mac-permission-card" id="mac-permission-card">
+              <h3>Mac Permission Check</h3>
+              <p>Open these settings if tracking cannot see the active app or window title on macOS.</p>
+              <div class="permission-row">
+                <div>
+                  Accessibility
+                  <div class="permission-status" id="accessibility-status">Checking</div>
+                </div>
+                <button class="permission-button" id="open-accessibility" type="button">Open</button>
+              </div>
+              <div class="permission-row">
+                <div>
+                  Screen Recording
+                  <div class="permission-status" id="screen-status">Checking</div>
+                </div>
+                <button class="permission-button" id="open-screen-recording" type="button">Open</button>
+              </div>
+            </div>
+            <div class="guide-card">
+              <h3>Reset</h3>
+              <p><strong>Reset</strong> clears the signed-in user's tracked time and restarts the current clock from zero. Use it only when you want a clean history.</p>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
